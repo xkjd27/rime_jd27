@@ -495,7 +495,7 @@
 其	0	viuo	ji	6	qi	3
 具	0	iauo	jv	4
 典	0	iauo	dian	4
-兹	0	ouaa	ci	5	zi	4
+兹	0	ouaa	ci	5	zi	6
 养	0	ouui	yang	3
 兼	0	ouva	jian	4
 兽	0	ouvo	shou	4
@@ -5047,7 +5047,7 @@
 籴	0	uoou	di	4
 类	0	ouvu	lei	2
 籼	0	ouia	xian	5
-籽	0	ouai	zi	6
+籽	0	ouai	zi	1
 粄	0	oouu	ban	4
 粉	0	ouuo	fen	3
 粑	1	ouai	ba	5
