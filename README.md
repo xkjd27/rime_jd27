@@ -2,4 +2,4 @@
 WIP
 
 ### 布局
-![Layout](/Lambda/Images/layout-qwerty.png)
+![Layout](/Lambda/Images/layout.png)
