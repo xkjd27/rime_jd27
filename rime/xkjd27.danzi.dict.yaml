@@ -2697,7 +2697,7 @@ sort: original
 靛	dmvvo
 琔	dmvvoo
 靛	dmvvoo
-扽	dn
+扽	dni
 扽	dniuva
 当	dp
 凼	dpa
@@ -3687,7 +3687,7 @@ sort: original
 玿	ezvv
 玿	ezvvau
 发	f
-覅	fc
+覅	fcv
 覅	fcviua
 否	fd
 缶	fdu
@@ -6466,6 +6466,7 @@ sort: original
 咭	jkovoo
 瘠	jkovov
 脊	jkovu
+鹡	jkovua
 麂	jkovua
 脊	jkovuu
 疾	jkovuv
@@ -6489,8 +6490,6 @@ sort: original
 戟	jkuo
 赍	jkuoa
 赍	jkuoao
-鹡	jkuou
-鹡	jkuoua
 戟	jkuova
 肌	jkuu
 肌	jkuuaa
@@ -9577,7 +9576,6 @@ sort: original
 嫩	nnauvi
 恁	nni
 恁	nniuoa
-囊	np
 攮	npi
 攮	npiuvi
 囔	npo
@@ -9588,6 +9586,7 @@ sort: original
 馕	npuavi
 齉	npui
 齉	npuivi
+囊	npv
 囊	npvioo
 牛	nq
 妞	nqa
@@ -11085,7 +11084,7 @@ sort: original
 跫	qyvio
 跫	qyvioi
 琼	qyvvov
-一	r
+人	r
 与	r;
 预	r;a
 驭	r;aa
@@ -16539,14 +16538,14 @@ sort: original
 仄	zevu
 仄	zevuii
 责	zevvao
-咱	zf
 攒	zfi
 拶	zfiu
 拶	zfiuaa
 攒	zfiuuv
-糌	zfo
+咱	zfo
 寁	zfoo
 寁	zfoova
+糌	zfou
 咱	zfouia
 糌	zfouua
 赞	zfu

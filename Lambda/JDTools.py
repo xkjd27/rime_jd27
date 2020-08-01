@@ -90,6 +90,24 @@ def yun(py):
         return py[2:]
     return py[1:]
 
+def s(shape):
+    """拆分转形码"""
+    code = []
+    for stroke in shape:
+        if stroke in JD_B:
+            code.append(JD_B[stroke])
+    return ''.join(code)
+
+JD_B_R = {value:key for key, value in JD_B.items()}
+
+def code2shape(code):
+    """形码转拆分"""
+    shape = []
+    for char in code:
+        if char in JD_B_R:
+            shape.append(JD_B_R[char])
+    return ''.join(shape)
+
 def pinyin2sy(py):
     """全拼转双拼"""
     if len(py) < 1:
@@ -169,7 +187,7 @@ def zi2codes(zi, short = True, full = True):
         else:
             sy_codes[sy] = (w[1], w[0])
 
-    b = zi.shape()
+    b = s(zi.shape())
     char = zi.char()
     rank = zi.rank()
     which = zi.which()
@@ -348,12 +366,12 @@ def word2codes(word, pinyin, length, short = True, full = False):
     if (first_char is None or second_char is None):
         return set()
 
-    shape = first_char.shape()[0] + second_char.shape()[0]
+    shape = s(first_char.shape()[0]) + s(second_char.shape()[0])
     if len(sound_chars) == 3: # 三字词需三码
         third_char = ZiDB.get(sound_chars[2])
         if (third_char is None):
             return set()
-        shape += third_char.shape()[0]
+        shape += s(third_char.shape()[0])
 
     codes = set()
     for code in py_codes:
@@ -382,12 +400,12 @@ def ci2codes(ci, short = True, full = False):
     if (first_char is None or second_char is None):
         return None
 
-    shape = first_char.shape()[0] + second_char.shape()[0]
+    shape = s(first_char.shape()[0]) + s(second_char.shape()[0])
     if len(sound_chars) == 3: # 三字词需三码
         third_char = ZiDB.get(sound_chars[2])
         if (third_char is None):
             return set()
-        shape += third_char.shape()[0]
+        shape += s(third_char.shape()[0])
 
     for data in weights:
         pinyin, shortcode_len, rank = data
@@ -406,7 +424,7 @@ def ci2codes(ci, short = True, full = False):
         if (full):
             codes.add((ci.word(), full_code, rank, pinyin))
         if (short):
-            short_code = full_code[:shortcode_len]
+            short_code = full_code[:shortcode_len] + (shortcode_len - len(full_code)) * '-'
             codes.add((ci.word(), short_code, rank, pinyin))
             
     return codes
@@ -472,7 +490,11 @@ def traverse_danzi(build = False, report = True):
                 while True:
                     if (len(sc) < 1):
                         break
-                
+
+                    if sc in JD_RESERVED:
+                        sc = sc[:-1]
+                        continue
+                    
                     if sc in codes:
                         if (codes[sc][0][3] == ZiDB.SUPER and which == ZiDB.GENERAL):
                             substitute = codes[sc][0][0]
@@ -541,6 +563,10 @@ def traverse_cizu(build = False, report = True):
                     break
                 elif word_len != 3 and len(sc) < 4:
                     break
+
+                if sc in JD_RESERVED:
+                    sc = sc[:-1]
+                    continue
                 
                 if sc not in dup_code_check:
                     avaliable_short = sc
@@ -564,7 +590,8 @@ def traverse_cizu(build = False, report = True):
         code_dups = len(dup_code_check[code])
         
         if (len(code) == 6 and code_dups > 1):
-            dup_count[len(code) - 3] += 1
+            if (len(code) <= 6):
+                dup_count[len(code) - 3] += 1
             dup_word_count += len(dup_code_check[code])
             code_dup_lose_flag.add(code)
             continue
@@ -575,10 +602,15 @@ def traverse_cizu(build = False, report = True):
             if dup_code_check[code][1][2] >= 100 and dup_code_check[code][0][2] != dup_code_check[code][1][2]:
                 code_dup_lose_flag.add(code)
             else:
+                if (len(code) <= 6):
+                    lose_dup_count[len(code) - 3] += 1
+        elif code_dups >= 2:
+            if (len(code) <= 6):
                 lose_dup_count[len(code) - 3] += 1
 
         if code_dups > 1:
-            dup_count[len(code) - 3] += 1
+            if (len(code) <= 6):
+                dup_count[len(code) - 3] += 1
             dup_word_count += len(dup_code_check[code])
 
     if report:
@@ -698,7 +730,7 @@ def get_char_shape(char):
     if zi is None:
         return ""
     
-    return ZiDB.get(char).shape()
+    return s(ZiDB.get(char).shape())
 
 def get_char(char):
     return ZiDB.get(char)
