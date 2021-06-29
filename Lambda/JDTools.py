@@ -1,9 +1,10 @@
 import sys
 import os
-import ZiDB
-import CiDB
+from pathlib import Path
+from . import ZiDB
+from . import CiDB
 import itertools
-from Layout import *
+from .Layout import *
 
 # ---------------------------------
 #               常量
@@ -12,63 +13,18 @@ from Layout import *
 RIME_HEADER = '# 由键道：涵自动生成\n---\nname: %s\nversion: "q2"\nsort: original\n...\n' % (RIME_SCHEMA + ".%s")
 RIME_PATH = 'rime/%s' % (RIME_SCHEMA + ".%s.dict.yaml")
 
-# 拼音变体转换表
-PY_TRANSFORM = {
-    'qve': 'que',
-    'lve': 'lue',
-    'jve': 'jue',
-    'xve': 'xue',
-    'yve': 'yue',
-    'm': 'en',
-    'ng': 'eng',
-}
-
-# 特殊声母表
-PY_SHENG = {
-    'a': '~',
-    'ai': '~',
-    'an': '~',
-    'ang': '~',
-    'ao': '~',
-    'e': '~',
-    'ei': '~',
-    'en': '~',
-    'eng': '~',
-    'er': '~',
-    'o': '~',
-    'ou': '~',
-}
-
-# 特殊韵母表
-PY_YUN = {
-    'ya': 'ia', 
-    'yan': 'ian', 
-    'yang': 'iang',
-    'yao': 'iao',
-    'ye': 'ie',
-    'yong': 'iong',
-    'you': 'iu',
-    'ju': 'v',
-    'qu': 'v',
-    'xu': 'v',
-    'yu': 'v',
-    'a': 'a',
-    'ai': 'ai',
-    'an': 'an',
-    'ang': 'ang',
-    'ao': 'ao',
-    'e': 'e',
-    'ei': 'ei',
-    'en': 'en',
-    'eng': 'eng',
-    'er': 'er',
-    'o': 'o',
-    'ou': 'ou',
-}
-
 # ---------------------------------
 #             辅助函数
 # ---------------------------------
+def static_transform(text):
+    result = text
+    for token in JD_S2K:
+        result = result.replace('<%s>' % token, JD_S2K[token])
+    for token in JD_Y2K:
+        result = result.replace('<%s>' % token, JD_Y2K[token])
+    for token in JD_B:
+        result = result.replace('<%s>' % token, JD_B[token])
+    return result
 
 def sheng(py):
     """取全拼声母"""
@@ -122,20 +78,18 @@ def pinyin2sy(py):
     s = JD_S2K[shengmu]
     y = JD_Y2K[yunmu]
 
-    sy = []
-    for ss in s:
-        for yy in y:
-            sy.append(ss+yy)
-
-    return sy
+    return [s+y]
 
 def pinyin2s(py):
     """全拼转声拼"""
     shengmu = sheng(py)
-    
+
+    if (shengmu not in JD_S2K):
+        return []
+
     s = JD_S2K[shengmu]
 
-    return s
+    return [s]
 
 def transform_py(py):
     """全拼预处理"""
@@ -190,7 +144,7 @@ def zi2codes(zi, short = True, full = True):
     b = s(zi.shape())
     char = zi.char()
     rank = zi.rank()
-    which = zi.which()
+    common = zi.common()
 
     for sy in sy_codes:
         w, pinyin = sy_codes[sy]
@@ -202,12 +156,12 @@ def zi2codes(zi, short = True, full = True):
         if (w < len(full_code)):
             has_short = True
             if (short):
-                codes.append((char, full_code[:w], rank, which, True, pinyin))
+                codes.append((char, full_code[:w], rank, common, True, pinyin))
         else:
             has_short = False
         
         if full:
-            codes.append((char, full_code, rank, which, not has_short, pinyin))
+            codes.append((char, full_code, rank, common, not has_short, pinyin))
     
     return codes
 
@@ -243,9 +197,8 @@ def get_danzi_codes():
             else:
                 _entries_r[code[1]] = [code]
 
-
     for entry in ZiDB.fixed():
-        code = (entry[0], entry[1], -1, entry[2], None, '')
+        code = (entry[0], static_transform(entry[1]), -1, entry[2], None, '')
         _entries.append(code)
         if (code[1] in _entries_r):
             _entries_r[code[1]].append(code)
@@ -277,7 +230,7 @@ def get_cizu_codes():
     else:
         return _word_entries, _word_entries_r
 
-    words = CiDB.all(CiDB.GENERAL)
+    words = CiDB.all()
     for ci in words:
         codes = ci2codes(ci, True, False)
         if (codes is not None):
@@ -293,8 +246,8 @@ def get_cizu_codes():
 
     # 固定词组
     extra = 500
-    for entry in CiDB.fixed(CiDB.GENERAL):
-        code = (entry[0], entry[1], extra, '')
+    for entry in CiDB.fixed():
+        code = (entry[0], static_transform(entry[1]), extra, '', entry[2])
         _word_entries.append(code)
         if (code[1] in _word_entries_r):
             _word_entries_r[code[1]].append(code)
@@ -393,6 +346,7 @@ def ci2codes(ci, short = True, full = False):
 
     py_codes = {}
     weights = ci.weights()
+    common = ci.common()
 
     first_char = ZiDB.get(sound_chars[0])
     second_char = ZiDB.get(sound_chars[1])
@@ -422,10 +376,10 @@ def ci2codes(ci, short = True, full = False):
         full_code = code + shape
         shortcode_len, rank, pinyin = py_codes[code]
         if (full):
-            codes.add((ci.word(), full_code, rank, pinyin))
+            codes.add((ci.word(), full_code, rank, pinyin, common))
         if (short):
             short_code = full_code[:shortcode_len] + (shortcode_len - len(full_code)) * '-'
-            codes.add((ci.word(), short_code, rank, pinyin))
+            codes.add((ci.word(), short_code, rank, pinyin, common))
             
     return codes
 
@@ -439,7 +393,6 @@ def traverse_danzi(build = False, report = True):
     last_code = ''
 
     rank_check = [
-        None,
         ('', '', -2),
         ('', '', -2),
     ]
@@ -459,10 +412,8 @@ def traverse_danzi(build = False, report = True):
         report = None
 
     for entry in entries:
-        char, code, rank, which, is_shortest, pinyin = entry
-
-        if which != ZiDB.GENERAL and which != ZiDB.SUPER:
-            continue
+        char, code, rank, common, is_shortest, pinyin = entry
+        which = int(common)
 
         if report:
             # 检查重码
@@ -479,8 +430,7 @@ def traverse_danzi(build = False, report = True):
                 dups.clear()
 
             if (len(code) == 6 and rank_check[which][0] == code and rank_check[which][2] == rank):
-                report.write('全码序冲突：%6s %s %s [%d] (%s)\n' % (code, char, rank_check[which][1], rank, ('通常' if which == ZiDB.GENERAL else '超级')))
-
+                report.write('全码序冲突：%6s %s %s [%d] (%s)\n' % (code, char, rank_check[which][1], rank, ('通常' if common else '超级')))
             # 简码空间检查
             if (is_shortest):
                 sc = code[:-1]
@@ -491,12 +441,12 @@ def traverse_danzi(build = False, report = True):
                     if (len(sc) < 1):
                         break
 
-                    if sc in JD_RESERVED:
-                        sc = sc[:-1]
-                        continue
+                    # if sc in JD_RESERVED:
+                    #     sc = sc[:-1]
+                    #     continue
                     
                     if sc in codes:
-                        if (codes[sc][0][3] == ZiDB.SUPER and which == ZiDB.GENERAL):
+                        if (not codes[sc][0][3] and common):
                             substitute = codes[sc][0][0]
                             avaliable_short = sc
                     else:
@@ -509,13 +459,13 @@ def traverse_danzi(build = False, report = True):
                     if (substitute is not None):
                         report.write('可替换："%s" %6s -> %6s (替换超级字 "%s")\n' % (char, code, avaliable_short, substitute))
                     else:
-                        report.write('可缩码："%s" %6s -> %6s (%s) | %s\n' % (char, code, avaliable_short, pinyin, ('通常' if which == ZiDB.GENERAL else '超级')))
+                        report.write('可缩码："%s" %6s -> %6s (%s) | %s\n' % (char, code, avaliable_short, pinyin, ('通常' if common else '超级')))
 
         last_code = code
 
         rank_check[which] = (code, char, rank)
 
-        if danzi is not None and which == ZiDB.GENERAL:
+        if danzi is not None and common:
             danzi.write(char+'\t'+code+'\n')
     
     if (report and len(dups) > 1):
@@ -530,9 +480,9 @@ def traverse_danzi(build = False, report = True):
 
 def traverse_cizu(build = False, report = True):
     """遍历词组码表"""
-    # dup_code_check = {}
+    # codes = {}
     last_rank = -1
-    entries, dup_code_check = get_cizu_codes()
+    entries, codes = get_cizu_codes()
 
     if build:
         f = open(RIME_PATH % 'cizu', mode='w', encoding='utf-8', newline='\n')
@@ -547,10 +497,10 @@ def traverse_cizu(build = False, report = True):
         optimize = None
 
     for entry in entries:
-        word, code, rank, pinyin = entry
+        word, code, rank, pinyin, common = entry
         word_len = len(CiDB.sound_chars(word))
 
-        if f is not None:
+        if f is not None and common:
             f.write(word+'\t'+code+'\n')
 
         if report:
@@ -564,11 +514,7 @@ def traverse_cizu(build = False, report = True):
                 elif word_len != 3 and len(sc) < 4:
                     break
 
-                if sc in JD_RESERVED:
-                    sc = sc[:-1]
-                    continue
-                
-                if sc not in dup_code_check:
+                if sc not in codes:
                     avaliable_short = sc
 
                 sc = sc[:-1]
@@ -586,20 +532,20 @@ def traverse_cizu(build = False, report = True):
     code_dup_lose_flag = set()
 
     dup_word_count = 0
-    for code in dup_code_check:
-        code_dups = len(dup_code_check[code])
+    for code in codes:
+        code_dups = len(codes[code])
         
         if (len(code) == 6 and code_dups > 1):
             if (len(code) <= 6):
                 dup_count[len(code) - 3] += 1
-            dup_word_count += len(dup_code_check[code])
+            dup_word_count += len(codes[code])
             code_dup_lose_flag.add(code)
             continue
 
         # 如果只有二重
         if code_dups == 2:
             # 如果强制允许了重码
-            if dup_code_check[code][1][2] >= 100 and dup_code_check[code][0][2] != dup_code_check[code][1][2]:
+            if codes[code][1][2] >= 100 and codes[code][0][2] != codes[code][1][2]:
                 code_dup_lose_flag.add(code)
             else:
                 if (len(code) <= 6):
@@ -611,7 +557,7 @@ def traverse_cizu(build = False, report = True):
         if code_dups > 1:
             if (len(code) <= 6):
                 dup_count[len(code) - 3] += 1
-            dup_word_count += len(dup_code_check[code])
+            dup_word_count += len(codes[code])
 
     if report:
         report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Report/词组重码报告.txt')
@@ -619,7 +565,7 @@ def traverse_cizu(build = False, report = True):
         report = open(report_path, mode='w', encoding='utf-8', newline='\n')
         report_allowed = open(report_path_2, mode='w', encoding='utf-8', newline='\n')
 
-        code_total = len(dup_code_check)
+        code_total = len(codes)
         dup_total = sum(dup_count)
         lose_dup_total = sum(lose_dup_count)
 
@@ -636,15 +582,17 @@ def traverse_cizu(build = False, report = True):
 
         report.write('---\n')
 
-        records = list(dup_code_check.items())
+        records = list(codes.items())
         records.sort(key=lambda e: (len(e[0]), e[0]))
+
+        fullcode_issue = {}
         
         for record in records:
             code = record[0]
             dups = record[1]
             if len(dups) <= 1:
                 continue
-                
+            
             if (code in code_dup_lose_flag):
                 f = report_allowed
             else:
@@ -652,35 +600,31 @@ def traverse_cizu(build = False, report = True):
 
             f.write('%s\n' % code)
             
+            rank_check = set()
             for word in dups:
+                if len(code) == 6 and word[2] in rank_check and word[1] not in fullcode_issue:
+                    fullcode_issue[word[1]] = dups
+                rank_check.add(word[2])
+
                 f.write('\t%d\t%s\n' % (word[2], word[0]))
-        
+
+
             f.write('\n')
+
+        report.write('---\n')
+        report.write('六码顺序问题\n')
+        for issue in sorted(list(fullcode_issue.items())):
+            report.write('%s\n' % issue[0])
+            for word in issue[1]:
+                report.write('\t%d\t%s\n' % (word[2], word[0]))
+            report.write('\n')
 
         report.close()
         report_allowed.close()
 
 
 def build_chaoji():
-    entries, _ = get_danzi_codes()
-    
-    chaoji = list(filter(lambda e: e[3] == ZiDB.SUPER, entries))
-
-    words = CiDB.all(CiDB.SUPER)
-    for ci in words:
-        codes = ci2codes(ci, True, False)
-        if (codes is not None):
-            chaoji += codes
-        else:
-            CiDB.remove(ci.word(), ci.pinyins())
-
-    extra = 500
-    for entry in CiDB.fixed(CiDB.SUPER):
-        code = (entry[0], entry[1], extra, 1, '')
-        chaoji.append(code)
-        extra += 1
-
-    chaoji.sort(key=lambda e: (e[1], e[2]))
+    chaoji = list(filter(lambda e: not e[3], get_danzi_codes()[0])) + list(filter(lambda e: not e[4], get_cizu_codes()[0]))
 
     f = open(RIME_PATH % 'chaojizici', mode='w', encoding='utf-8', newline='\n')
     f.write(RIME_HEADER % 'chaojizici')
@@ -703,13 +647,13 @@ def build_chaoji():
 #       排序        通常/超级   字/词    全拼   编码
 #
 #   Detailed Commands
-#       add_char                        char    shape   pinyin  length  weight  which
+#       add_char                        char    shape   pinyin  length  weight
 #       add_char_pinyin                 char    pinyin  length
 #       remove_char_pinyin              char    set(pinyin)
 #       change_char_shape               char    shape
 #       change_char_shortcode_len       char    set(pinyin)  length
 #       change_char_fullcode_weight     char    weight
-#       add_word                        word    pinyin  length  weight  which
+#       add_word                        word    pinyin  length  weight
 #       add_word_pinyin                 word    pinyin  length  weight
 #       remove_word_pinyin              word    set(pinyin)
 #       change_word_shortcode_len       word    set(pinyin)  length
@@ -825,9 +769,9 @@ def solve_word_pinyin(word, pinyin):
     
     return solved
 
-def add_char(char, shape, pinyin, length, weight, which):
+def add_char(char, shape, pinyin, length, weight):
     py = transform_py(pinyin)
-    zi = ZiDB.add(char, shape, [(py, length)], weight, which)
+    zi = ZiDB.add(char, shape, [(py, length)], weight)
 
     codes = gen_char(char)
 
@@ -889,11 +833,11 @@ def check_word(word, pinyin):
        
     return problems, pys
 
-def add_word(word, pinyin, length, weight, which):
+def add_word(word, pinyin, length, weight):
     problems, pys = check_word(word, pinyin)
     assert len(problems) == 0, "\n".join(problems)
 
-    ci = CiDB.add(word, [(pys, length, weight)], which)
+    ci = CiDB.add(word, [(pys, length, weight)])
 
     codes = gen_word(word)
 
@@ -976,13 +920,16 @@ def find_weight_for_word(word, pinyin, length):
                 
     return weight
 
-def find_space_for_word(word, pinyin):
+def find_space_for_word(word, pinyin, current = True):
     codes = list(word2codes(word, pinyin, 6, False, True))
     if len(codes) == 0:
         return None
     
     short = [code[:-1] for code in codes]
-    _, lookup = get_current_cizu_codes()
+    if current:
+        _, lookup = get_current_cizu_codes()
+    else:
+        _, lookup = get_cizu_codes()
 
     full_dup = 0
     for code in codes:
@@ -1023,7 +970,7 @@ def find_space_for_char(shape, pinyin):
             if code in lookup:
                 avaliable = False
                 break
-        
+
         if (avaliable):
             avaliable_spaces.append(i)
         short = [code[:-1] for code in short]
@@ -1032,6 +979,16 @@ def find_space_for_char(shape, pinyin):
 
 def sound_chars(word):
     return CiDB.sound_chars(word)
+
+def replace_static(text):
+    result = text
+    for token in JD_B:
+        result = result.replace("<%s>" % token, JD_B[token])
+    for token in JD_Y2K:
+        result = result.replace("<%s>" % token, JD_Y2K[token])
+    for token in JD_S2K:
+        result = result.replace("<%s>" % token, JD_S2K[token])
+    return result
 
 def build_static():
     static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Static')
@@ -1045,7 +1002,7 @@ def build_static():
         with open(RIME_PATH % STAITC_MAP[static], mode='w', encoding='utf-8', newline='\n') as outfile:
             outfile.write(RIME_HEADER % STAITC_MAP[static])
             with open(os.path.join(static_path, static), mode='r', encoding='utf-8') as infile:
-                outfile.write('\n'.join(line.strip() for line in infile.readlines()))
+                outfile.write('\n'.join(replace_static(line.strip()) for line in infile))
 
 def find_all_pinyin_of_word(word):
     sound = sound_chars(word)
@@ -1077,7 +1034,26 @@ def get_all_zi():
     return ZiDB.all()
 
 def get_all_ci():
-    return CiDB.all(CiDB.GENERAL)
+    return CiDB.all()
+
+def build_log_tsv():
+    """Build code list for log input."""
+    root = Path("rime/")
+    with open(f"log_input/{RIME_SCHEMA}.txt", "w", encoding="utf-8") as out:
+        for f in root.iterdir():
+            if f.name.endswith(".yaml"):
+                with f.open("r", encoding="utf-8") as src:
+                    skip = True
+                    for line in src:
+                        line = line.strip()
+                        if line == "...":
+                            skip = False
+                            continue
+                        if skip:
+                            continue
+                        if not line or line.startswith("#"):
+                            continue
+                        out.write(line + "\n")
 
 def commit():
     """提交所有更改并生成新码表"""
@@ -1089,6 +1065,7 @@ def commit():
     traverse_cizu(True, True)
     build_chaoji()
     build_static()
+    build_log_tsv()
 
 def reset():
 
