@@ -2,7 +2,7 @@ from . import JDTools
 import os
 import sys
 import re
-import readline
+from pyreadline import Readline
 from typing import List, Tuple, Set
 
 """
@@ -16,8 +16,7 @@ Usage:
         default to solving all codes
 """
 
-readline.set_auto_history(True)
-
+readline = Readline()
 
 # read report
 report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Report')

@@ -26,6 +26,10 @@ bsqm
 	0	八千
 	100	捌仟
 
+bswf
+	0	八万
+	100	捌万
+
 ekft
 	0	师院
 	100	拾元
@@ -61,6 +65,10 @@ fkjc
 fkqm
 	0	以前
 	100	壹仟
+
+fkwf
+	0	一晚
+	100	壹万
 
 jqbh
 	0	九百
@@ -270,6 +278,18 @@ wqbfv
 	0	抓不住
 	1	止不住
 
+;ef;oo
+	0	这是一种
+	1	只是一种
+
+;efxoo
+	0	只是一些
+	1	这是一项
+
+;fbfov
+	0	主要部分
+	1	这一部分
+
 ;kekiv
 	0	芝士
 	1	执事
@@ -301,6 +321,14 @@ wqbfv
 	3	众议
 	4	中易
 
+bffwvv
+	0	不要以为
+	1	不要因为
+
+bfwlvv
+	0	不要忘了
+	1	不要我了
+
 bj;kvi
 	0	布置
 	1	不值
@@ -309,6 +337,10 @@ bjekvo
 	0	不实
 	1	不时
 	2	布施
+
+bjf;va
+	0	不渝
+	1	不经一事不长一智
 
 bjfjvu
 	0	不负
@@ -322,9 +354,22 @@ bjfwva
 	0	不费
 	1	不允
 
+bjj;vi
+	0	不具
+	1	不见经传
+
+bjmfvi
+	0	不瞒
+	1	不仅没有
+
 bjrfva
-	0	不尽如人意
+	0	不尽人意
 	1	不绝如发
+	2	不尽如人意
+
+bjx;vu
+	0	不须
+	1	不教而诛
 
 bjxdvo
 	0	不谢
@@ -333,6 +378,10 @@ bjxdvo
 bjxxvu
 	0	不香
 	1	不象
+
+bkf;vv
+	0	不可抑制
+	1	不可言状
 
 bmfkio
 	0	便衣
@@ -373,6 +422,10 @@ dsqkvo
 dtwwua
 	0	短尾
 	1	段尾
+
+efxsii
+	0	睡眼惺忪
+	1	睡眼惺松
 
 ek;eiu
 	1	逝者
@@ -473,13 +526,30 @@ ffbfva
 	0	有法必依
 	1	有法不依
 
+ffbfvo
+	0	一言不发
+	1	一语不发
+
 ffdfvv
 	0	远远大于
 	1	远远低于
 
+ffejii
+	0	业余时间
+	1	营业时间
+
 ffffaa
-	0	隐隐约约
+	0	沸沸扬扬
 	1	纷纷扬扬
+	2	隐隐约约
+
+ffffuu
+	0	反反复复
+	1	风风雨雨
+
+fffkuo
+	0	反咬一口
+	1	反译
 
 ffhquo
 	0	反话
@@ -501,6 +571,14 @@ fjhvov
 	0	有计划
 	1	原计划
 
+fjqtau
+	0	以及其它
+	1	以及其他
+
+fjskvo
+	0	一家三口
+	1	一家四口
+
 fk;kau
 	0	已知
 	1	异质
@@ -513,6 +591,10 @@ fk;kou
 	0	译制
 	2	义肢
 
+fkejov
+	0	易术
+	1	放开手脚
+
 fkekai
 	0	已逝
 	1	已使
@@ -524,6 +606,11 @@ fkekvv
 fkf;ov
 	0	益于
 	1	易于
+	2	亦可覆舟
+
+fkfdvo
+	0	一口咬定
+	1	一叶
 
 fkjmvi
 	0	一件
@@ -545,9 +632,21 @@ fmfmvv
 	0	严严
 	1	奄奄
 
+fmxsvo
+	0	一门心思
+	1	盐啊
+
 fpqkov
 	0	放起
 	1	房契
+
+fqbfvv
+	0	一切办法
+	1	一去不复返
+
+fqdevv
+	0	有趣的是
+	1	一切都是
 
 fqwwvv
 	0	有违
@@ -577,6 +676,7 @@ ftenvo
 ftwwvo
 	0	原味
 	1	原为
+	2	有头无尾
 
 fwfwiv
 	0	亿万富翁
@@ -606,9 +706,21 @@ hejkiv
 	0	合击
 	1	合辑
 
+hff;ui
+	0	韩愈
+	1	行业发展
+
+hjfrua
+	0	后继有人
+	1	后继乏人
+
 hlekov
 	0	火石
 	1	祸事
+
+hlhqov
+	0	晃来晃去
+	1	呼来喝去
 
 hzxxau
 	0	好象
@@ -626,13 +738,21 @@ jcfsua
 	0	脚法
 	1	教法
 
+jdbfav
+	0	激动不已
+	1	绝大部分
+
 jdekao
 	0	结识
 	1	届时
 
+jdglii
+	0	监督管理
+	1	揭锅
+
 jdj;ii
 	0	借据
-	0	监督机制
+	1	监督机制
 
 jkdmvi
 	0	基点
@@ -686,6 +806,18 @@ lmjdva
 	0	连结
 	1	联结
 
+mfbfav
+	0	没有办法
+	1	没有必要
+
+mfffav
+	0	没有反应
+	1	没有意义
+
+mfftau
+	0	满腹疑团
+	1	民怨沸腾
+
 mgekoi
 	0	明史
 	1	明誓
@@ -693,6 +825,10 @@ mgekoi
 q;jmvi
 	0	去捡
 	1	取件
+
+qgf;vo
+	0	青宇
+	1	棋高一着
 
 qgfkoo
 	0	情义
@@ -741,6 +877,10 @@ skjkvo
 wfekvv
 	0	万世
 	1	顽石
+
+wfwjva
+	0	无法忘记
+	1	无以为继
 
 wjfkva
 	0	无异
@@ -792,6 +932,10 @@ xddviu
 	0	喜当爹
 	1	相当多
 
+xdhevi
+	0	现代化建设
+	1	鞋盒
+
 xf;evv
 	0	需要注意的是
 	1	需要指出的是
@@ -808,6 +952,10 @@ xhhzoo
 	0	学号
 	1	哀号
 	2	哀嚎
+
+xhwfoa
+	0	哀婉
+	1	学海无涯
 
 xmf;uu
 	0	鲜鱼
